@@ -7,6 +7,9 @@ using UnityEngine;
 
 public class Move2Player : MonoBehaviour
 {
+
+    //Moves the enemy toward the player, sends damage commands on contact, stuns and pushes the enemy after a successful attack
+
     [Header("Enemy Movement")]
     public float moveSpeed = 2.5f;
     public float enemyDamage = 1;
@@ -16,19 +19,25 @@ public class Move2Player : MonoBehaviour
     [Header("Player Reference")]
     public Transform playerPos;
     public PlayerHealth playerDamage;
+    public Vector2 directionPlayer;
+    public Vector2 directionPlayerInverted;
 
     [Header("Stun Vars")]
     [SerializeField] private bool enemyStunned;
     [SerializeField] private string stunType;
     [SerializeField] private IEnumerator StunCor;
-    public float stunTime;
+    [SerializeField] private IEnumerator PushCD;
+    [SerializeField] private bool PCD_Active;
+    public float pushTime;
     public float stunForce;
 
     // Start is called before the first frame update
     void Start()
     {
+        PCD_Active = false;
         enemyStunned = false;
         StunCor = Stun(null);
+        PushCD = PushCooldown();
     }
     // Update is called once per frame
     void Update()
@@ -36,8 +45,9 @@ public class Move2Player : MonoBehaviour
         if (playerPos != null)
         {
             distanceFromPlayer = Vector2.Distance(transform.position, playerPos.transform.position);
-            Vector2 direction = playerPos.transform.position - transform.position;
-            direction.Normalize();
+            directionPlayer = playerPos.transform.position - transform.position;
+            directionPlayer.Normalize();
+            directionPlayerInverted = directionPlayer * -1;
             //Debug.Log("Direction");
             //Debug.Log(direction);
             //Debug.Log("Dist From Player");
@@ -47,11 +57,12 @@ public class Move2Player : MonoBehaviour
 
             if (distanceFromPlayer >= 2 && enemyStunned == false)
             {
-                enemyRB.velocity = direction * moveSpeed;
+                enemyRB.velocity = directionPlayer * moveSpeed;
             }
             else if (enemyStunned == false)
             {
-                enemyRB.velocity = direction * moveSpeed / 1.5f;
+                //Slows enemy based on distance if i need it
+                //enemyRB.velocity = directionPlayer * moveSpeed / 1.5f;
             }
             else
             {
@@ -64,24 +75,26 @@ public class Move2Player : MonoBehaviour
         }
 
     }
-    private void OnCollisionStay2D(Collision2D collision)
+
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        Debug.Log("COL");
-        if (collision.collider.CompareTag("Player"))
+        if (collision.GetComponent<Collider2D>().CompareTag("Player"))
         {
             //Debug.Log("FOUND-TAG");
             //Stuns Enemy After Attack
             stunType = "OutputDMG";
-            if (enemyStunned == false)
+
+            if (enemyStunned == false && PCD_Active == false)
             {
                 enemyStunned = true;
                 StartCoroutine("Stun", stunType);
 
+                PCD_Active = true;
+                StartCoroutine("PushCooldown", PCD_Active);
             }
-
             //Gives Player Damage Command
-            playerDamage = collision.collider.GetComponent<PlayerHealth>();
-            playerDamage.TakeDamage(enemyDamage);
+            playerDamage = collision.GetComponent<Collider2D>().GetComponent<PlayerHealth>();
+            playerDamage.TakeDamage(enemyDamage);          
         }
     }
 
@@ -92,34 +105,47 @@ public class Move2Player : MonoBehaviour
 
         if (stunType == "OutputDMG")
         {
-            stunTime = 0.7f;
-            stunForce = 300f;
+            pushTime = 0.53f;
+            stunForce = 250f;
         }
         else if (stunType == "TookDamage")
         {
-            stunTime = 0.1f;
-            stunForce = 300f / 3;
+            pushTime = 0.2f;
+            stunForce = 250f / 3;
         }
         else
         {
             Debug.Log("FATAL-NO-STUN-TYPE");
-            stunTime = 0f;
+            pushTime = 0f;
         }
 
 
         //Same as the direction vector for enemy movement
-        Vector2 direction = playerPos.transform.position - transform.position;
-        direction.Normalize();
+        //Vector2 direction = playerPos.transform.position - transform.position;
+        //direction.Normalize();
+
+        //Freezes the enemy initially for more impact
+        yield return new WaitForSeconds(0.01f);
+
         //Inverts the vector defined above
-        Vector2 directionInverted = direction * -1;
-        enemyRB.AddForce(directionInverted * stunForce, ForceMode2D.Force);
-        Debug.Log(directionInverted * stunForce);
+        enemyRB.AddForce(directionPlayerInverted * stunForce, ForceMode2D.Force);
 
         enemyRB.velocity = Vector2.zero;
 
-        yield return new WaitForSeconds(stunTime);
+        yield return new WaitForSeconds(pushTime);
+
+        enemyRB.velocity = Vector2.zero;
+
+        yield return new WaitForSeconds(0.2f);
 
         enemyStunned = false;
         stunType = "";
+    }
+
+    private IEnumerator PushCooldown()
+    {
+        yield return new WaitForSecondsRealtime(2f);
+        Debug.Log("Push Cooldown Over");
+        yield return PCD_Active = false;
     }
 }

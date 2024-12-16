@@ -5,9 +5,12 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
 
+    //Gives the player the ability to take damage, handles IFrames, and activates any movement that may be enacted on the player after being damaged
+
     [SerializeField] private float baseHealth;
     [SerializeField] private float currentHealth;
     [SerializeField] private float IFrameTime;
+    public PlayerControl pControl;
     private bool iFramesActive;
     private IEnumerator IFramesCo;
 
@@ -40,6 +43,7 @@ public class PlayerHealth : MonoBehaviour
             iFramesActive = true;
             //Debug.Log("RUN-ROUTINE");
             StartCoroutine(IFramesCo);
+            pControl.HitEffects();
         }
     }
 
