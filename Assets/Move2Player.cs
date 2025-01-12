@@ -31,6 +31,9 @@ public class Move2Player : MonoBehaviour
     public float pushTime;
     public float stunForce;
 
+    public float aoeRadius = 5f;
+    public float pushForce = 500f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,6 +45,9 @@ public class Move2Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Spacial Awareness. Check for nearby enemies and try circling the player instead of beelining if needed
+
+
         if (playerPos != null)
         {
             distanceFromPlayer = Vector2.Distance(transform.position, playerPos.transform.position);
@@ -91,6 +97,8 @@ public class Move2Player : MonoBehaviour
 
                 PCD_Active = true;
                 StartCoroutine("PushCooldown", PCD_Active);
+
+                PerformAOEPushback();
             }
             //Gives Player Damage Command
             playerDamage = collision.GetComponent<Collider2D>().GetComponent<PlayerHealth>();
@@ -147,5 +155,27 @@ public class Move2Player : MonoBehaviour
         yield return new WaitForSecondsRealtime(2f);
         Debug.Log("Push Cooldown Over");
         yield return PCD_Active = false;
+    }
+
+    public void PerformAOEPushback()
+    {
+        // Detect all colliders within the AOE radius
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+
+        foreach (var hitCollider in hitColliders)
+        {
+            // Check if the collider belongs to an enemy with a Rigidbody2D
+            if (hitCollider.CompareTag("Enemy"))
+            {
+                Move2Player enemyStunCoords = hitCollider.GetComponent<Move2Player>();
+                if (enemyStunCoords != null)
+                {
+
+                    //Run Stun Functions
+                    enemyStunCoords.Stun("TookDamage");
+                    enemyStunCoords.PushCooldown();
+                }
+            }
+        }
     }
 }
