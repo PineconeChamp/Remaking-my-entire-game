@@ -19,6 +19,7 @@ public class CombatControl : MonoBehaviour
     [SerializeField] private bool reloadingGun;
     [SerializeField] private float reloadTime;
     [SerializeField] private float maxAmmo;
+    [SerializeField] private float runeMaxCharge;
 
     public FireAngle fireScript;
 
@@ -32,11 +33,12 @@ public class CombatControl : MonoBehaviour
         reloadTime = 0.5f;
     }
 
-    public void ReceiveValues()
+    public void ReceiveValues(float shotCooldownTime, float maxAmmo, float runeMaxCharge)
     {
         //Should get run by a weapon choice script at the start of the game
-        shotCooldownTime = 10f;
-        maxAmmo = 5;
+        this.shotCooldownTime = shotCooldownTime;
+        this.maxAmmo = maxAmmo;
+        this.runeMaxCharge = runeMaxCharge;
     }
 
     // Update is called once per frame

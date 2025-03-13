@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.XR;
 using UnityEngine;
@@ -31,7 +32,7 @@ public class Move2Player : MonoBehaviour
     public float pushTime;
     public float stunForce;
 
-    public float aoeRadius = 5f;
+    public float aoeRadius = 10f;
     public float pushForce = 500f;
 
     // Start is called before the first frame update
@@ -46,7 +47,12 @@ public class Move2Player : MonoBehaviour
     void Update()
     {
         //Spacial Awareness. Check for nearby enemies and try circling the player instead of beelining if needed
-
+        
+        //Check if player gets to fast and resets speed to max speed
+        if (enemyRB.velocity.magnitude > 1)
+        {
+            enemyRB.velocity = directionPlayer * moveSpeed;
+        }
 
         if (playerPos != null)
         {
@@ -61,14 +67,12 @@ public class Move2Player : MonoBehaviour
             //Debug.Log("direction * moveSpeed");
             //Debug.Log(direction * moveSpeed);
 
-            if (distanceFromPlayer >= 2 && enemyStunned == false)
+            Debug.Log(enemyStunned);
+            if (enemyStunned == false)
             {
-                enemyRB.velocity = directionPlayer * moveSpeed;
-            }
-            else if (enemyStunned == false)
-            {
-                //Slows enemy based on distance if i need it
-                //enemyRB.velocity = directionPlayer * moveSpeed / 1.5f;
+                //enemyRB.velocity = directionPlayer * moveSpeed;
+                enemyRB.AddForce(directionPlayer * moveSpeed, ForceMode2D.Force);
+                Debug.Log("adding force");
             }
             else
             {
@@ -82,6 +86,17 @@ public class Move2Player : MonoBehaviour
 
     }
 
+    public void RecieveAOEPushback()
+    {
+        if (enemyStunned == false && PCD_Active == false)
+        {
+            enemyStunned = true;
+            StartCoroutine("Stun", stunType);
+
+            PCD_Active = true;
+            StartCoroutine("PushCooldown", PCD_Active);
+        }
+    }
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.GetComponent<Collider2D>().CompareTag("Player"))
@@ -89,6 +104,8 @@ public class Move2Player : MonoBehaviour
             //Debug.Log("FOUND-TAG");
             //Stuns Enemy After Attack
             stunType = "OutputDMG";
+            playerDamage = collision.GetComponent<Collider2D>().GetComponent<PlayerHealth>();
+            playerDamage.TakeDamage(enemyDamage);
 
             if (enemyStunned == false && PCD_Active == false)
             {
@@ -100,9 +117,7 @@ public class Move2Player : MonoBehaviour
 
                 PerformAOEPushback();
             }
-            //Gives Player Damage Command
-            playerDamage = collision.GetComponent<Collider2D>().GetComponent<PlayerHealth>();
-            playerDamage.TakeDamage(enemyDamage);          
+            //Gives Player Damage Command          
         }
     }
 
@@ -113,13 +128,11 @@ public class Move2Player : MonoBehaviour
 
         if (stunType == "OutputDMG")
         {
-            pushTime = 0.53f;
-            stunForce = 250f;
+            pushTime = 1f;
         }
         else if (stunType == "TookDamage")
         {
-            pushTime = 0.2f;
-            stunForce = 250f / 3;
+            pushTime = 0.1f;
         }
         else
         {
@@ -127,22 +140,19 @@ public class Move2Player : MonoBehaviour
             pushTime = 0f;
         }
 
+        float duration = pushTime;
+        float time = 0;
+        Vector2 startPosition = transform.position;
+        Vector2 target = directionPlayerInverted;
 
-        //Same as the direction vector for enemy movement
-        //Vector2 direction = playerPos.transform.position - transform.position;
-        //direction.Normalize();
+        while (time < duration)
+        {
+            transform.position = Vector2.Lerp(startPosition, target, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
 
-        //Freezes the enemy initially for more impact
-        yield return new WaitForSeconds(0.01f);
-
-        //Inverts the vector defined above
-        enemyRB.AddForce(directionPlayerInverted * stunForce, ForceMode2D.Force);
-
-        enemyRB.velocity = Vector2.zero;
-
-        yield return new WaitForSeconds(pushTime);
-
-        enemyRB.velocity = Vector2.zero;
+        enemyRB.velocity = Vector2.zero;;
 
         yield return new WaitForSeconds(0.2f);
 
@@ -172,8 +182,7 @@ public class Move2Player : MonoBehaviour
                 {
 
                     //Run Stun Functions
-                    enemyStunCoords.Stun("TookDamage");
-                    enemyStunCoords.PushCooldown();
+                    enemyStunCoords.RecieveAOEPushback();
                 }
             }
         }

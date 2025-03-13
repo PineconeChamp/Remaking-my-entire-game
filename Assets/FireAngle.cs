@@ -9,6 +9,8 @@ public class FireAngle: MonoBehaviour
     private Vector3 mousePos;
     public GameObject bullet1;
     public Transform firePoint;
+    public float timeCharged;
+
     private void Start()
     {
         mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
@@ -32,6 +34,8 @@ public class FireAngle: MonoBehaviour
         //Effects dont matter so much as they can take into effect say for example after an enemy is hit it runs a script that has all current upgrades and returns all the values from a public mathing function
 
         GameObject bolt = Instantiate(bullet1, firePoint.position, firePoint.rotation);
+
+        bolt.GetComponent<BoltProjectile>().ChargeTimeReciever(timeCharged);
         bolt.GetComponent<Rigidbody2D>().AddForce(firePoint.up * 30, ForceMode2D.Impulse);
     }
 }

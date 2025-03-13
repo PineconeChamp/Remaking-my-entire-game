@@ -20,7 +20,7 @@ public class PlayerControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        stunTime = 0.2f;
+        stunTime = 0.05f;
         rb = GetComponent<Rigidbody2D> ();
         stunnedE = Stun();
     }
