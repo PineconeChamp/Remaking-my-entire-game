@@ -67,12 +67,10 @@ public class Move2Player : MonoBehaviour
             //Debug.Log("direction * moveSpeed");
             //Debug.Log(direction * moveSpeed);
 
-            Debug.Log(enemyStunned);
             if (enemyStunned == false)
             {
                 //enemyRB.velocity = directionPlayer * moveSpeed;
                 enemyRB.AddForce(directionPlayer * moveSpeed, ForceMode2D.Force);
-                Debug.Log("adding force");
             }
             else
             {
@@ -136,7 +134,6 @@ public class Move2Player : MonoBehaviour
         }
         else
         {
-            Debug.Log("FATAL-NO-STUN-TYPE");
             pushTime = 0f;
         }
 
@@ -163,7 +160,6 @@ public class Move2Player : MonoBehaviour
     private IEnumerator PushCooldown()
     {
         yield return new WaitForSecondsRealtime(2f);
-        Debug.Log("Push Cooldown Over");
         yield return PCD_Active = false;
     }
 

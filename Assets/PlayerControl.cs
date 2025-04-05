@@ -28,7 +28,6 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         speedX = Input.GetAxisRaw("Horizontal");
         speedY = Input.GetAxisRaw("Vertical");
         Vector2 normalSpeed = new Vector2(speedX, speedY);
@@ -68,7 +67,5 @@ public class PlayerControl : MonoBehaviour
         rb.velocity = Vector2.zero;
         yield return new WaitForSeconds(stunTime);
         yield return isStunned = false;
-        Debug.Log("Stun over");
-        Debug.Log(isStunned);
     }
 }

@@ -9,12 +9,16 @@ public class FireAngle: MonoBehaviour
     private Vector3 mousePos;
     public GameObject bullet1;
     public Transform firePoint;
+    public CombatControl player;
+
     public float timeCharged;
 
     private void Start()
     {
         mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<CombatControl>();
     }
+
     void Update()
     {
 
@@ -28,14 +32,14 @@ public class FireAngle: MonoBehaviour
 
     }
 
-    public void Fire()
+    public void Fire(float damage, float timeCharged)
     {
         //The whole Fire script should take in a bunch of values based off of what upgrades ect the player has optained that directly affect things about the bullet
         //Effects dont matter so much as they can take into effect say for example after an enemy is hit it runs a script that has all current upgrades and returns all the values from a public mathing function
 
         GameObject bolt = Instantiate(bullet1, firePoint.position, firePoint.rotation);
 
-        bolt.GetComponent<BoltProjectile>().ChargeTimeReciever(timeCharged);
+        bolt.GetComponent<BoltProjectile>().DataReciever(damage, timeCharged);
         bolt.GetComponent<Rigidbody2D>().AddForce(firePoint.up * 30, ForceMode2D.Impulse);
     }
 }

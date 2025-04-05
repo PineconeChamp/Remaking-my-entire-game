@@ -5,31 +5,42 @@ using UnityEngine;
 public class BoltProjectile : MonoBehaviour
 {
     public EnemyHealth enemyHealth;
-    public float directDamage;
+    public GameObject player;
     public float timeCharged;
+    public float totalDamage;
     // Start is called before the first frame update
     void Start()
     {
-        directDamage = 0;
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void ChargeTimeReciever(float timeCharged)
+    public void DataReciever(float damage, float timeCharged)
     {
         this.timeCharged = timeCharged;
+        totalDamage = damage;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void CalculateDamage()
     {
-        if (collision.collider.CompareTag("Enemy"))
+        totalDamage = totalDamage * timeCharged * 10f;
+        Debug.Log("Calculated " + totalDamage + " damage");
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        if (collision.gameObject.CompareTag("Enemy"))
         {
-            enemyHealth = collision.collider.GetComponent<EnemyHealth>();
-            enemyHealth.TakeDamage(directDamage);
+
+            CalculateDamage();
+            enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
+            enemyHealth.TakeDamage(totalDamage);
 
             //How damage types may be passed and calculated inside of the enemys take damages script.
             //enemyHealth.TakeDamage(physDamage, magicDamage, cursedDamage);

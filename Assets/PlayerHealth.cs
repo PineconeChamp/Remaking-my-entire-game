@@ -7,19 +7,20 @@ public class PlayerHealth : MonoBehaviour
 
     //Gives the player the ability to take damage, handles IFrames, and activates any movement that may be enacted on the player after being damaged
 
-    [SerializeField] private float baseHealth;
+    [SerializeField] private float maxHealth;
     [SerializeField] private float currentHealth;
     [SerializeField] private float IFrameTime;
+    [SerializeField] private float overHeal;
+    public RawStats Stats;
     public PlayerControl pControl;
     private bool iFramesActive;
     private IEnumerator IFramesCo;
-
 
     // Start is called before the first frame update
     void Start()
     {
         iFramesActive = false;
-        currentHealth = baseHealth;
+        currentHealth = maxHealth;
     }
 
     // Update is called once per frame
@@ -46,6 +47,17 @@ public class PlayerHealth : MonoBehaviour
             pControl.HitEffects();
         }
     }
+
+    public void Heal()
+    {
+
+    }
+
+    public void UpgradeHealth(float maxHealth)
+    {
+        this.maxHealth = maxHealth;
+    }
+
 
     public IEnumerator IFrames()
     {

@@ -11,37 +11,36 @@ public class RawStats : MonoBehaviour
     //Stats can be sent to the weapon firing script that can then interact with any runes that may have been collected and added to the stave.
 
     public CombatControl combatControl;
+    public PlayerHealth healthControl;
+    public FireAngle FireAngle;
 
-    Dictionary<string, int> playerStatsDict = new Dictionary<string, int>()
-    {
-        {"damage", 10},
-        {"health", 5},
-        {"speed", 5}
-    };
 
-    Dictionary<string, float> weaponStats = new Dictionary<string, float>()
-    {
-        {"shotCD", 0},
-        {"reloadTime", 0}
-    };
+    public float shotCooldownTime;
+    public float reloadTime;
+    public float maxAmmo;
+    public float runeMaxCharge;
+    public float critRate;
+    public float critDamage;
+    public float shotSpeed;
+    public float maxHealth;
 
     private void Start()
     {
-
-
-
-        //Pull in perma upgrade values
-        //Push base values to necesarry scripts
-
-        weaponStats["shotCD"] = 0.1f;
-
-        combatControl.ReceiveValues();
+        //Load in stats from character picker
+        shotCooldownTime = 0.2f;
+        maxAmmo = 10f;
+        reloadTime = 0.5f;
+        runeMaxCharge = 0f;
+        //GetCombatStats();
     }
 
-    private void CheckUserChoices()
+    private void GetCombatStats()
     {
-        weaponStats["shotCD"] = 0.1f;
+        combatControl.ReceiveValues(shotCooldownTime, maxAmmo, reloadTime);
+    }
 
-        combatControl.ReceiveValues();
+    public void GetHealthStats()
+    {
+        healthControl.UpgradeHealth(maxHealth);
     }
 }

@@ -7,6 +7,10 @@ public class EnemyHealth : MonoBehaviour
 {
     float maxHealth = 5f;
     float currentHealth;
+    public GameObject Gem;
+    GameObject bolt;
+    public GameObject DamageText;
+    private DamageTextLife dmgTXTSRC;
 
     // Start is called before the first frame update
     void Start()
@@ -22,9 +26,13 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        Debug.Log("Took damage");
 
         currentHealth -= damage;
+
+        GameObject dmgTXT = Instantiate(DamageText, transform.position, transform.rotation);
+        dmgTXTSRC = dmgTXT.GetComponent<DamageTextLife>();
+        dmgTXTSRC.StartLife(damage);
+
 
         if (currentHealth <= 0)
         {
@@ -35,7 +43,7 @@ public class EnemyHealth : MonoBehaviour
     public void Death()
     {
         Debug.Log("Enemy Dead");
-        //GameObject Gem = Instantiate([What to instantiate], [the position to instantiate]);
+        GameObject bolt = Instantiate(Gem, transform.position, transform.rotation);
 
         //Add small random movement
         //bolt.GetComponent<Rigidbody2D>().AddForce(firePoint.up * 30, ForceMode2D.Impulse);
